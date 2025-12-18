@@ -1,0 +1,240 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #111; /* 어두운 배경 */
+    color: #eee;
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow: hidden; /* 전체 스크롤 방지 */
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+    width: 250px;
+    padding: 40px;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 50px;
+    letter-spacing: 2px;
+    border: 2px solid white;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+ul {
+    list-style: none;
+}
+
+/* 연도 메뉴 */
+.year-item {
+    margin-bottom: 15px;
+}
+
+.year-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    padding: 5px 0;
+    transition: color 0.3s;
+}
+
+.year-btn:hover, .year-btn.active {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* 월별 서브메뉴 */
+.month-list {
+    display: none; /* 기본적으로 숨김 */
+    padding-left: 15px;
+    margin-top: 5px;
+}
+
+.month-list.open {
+    display: block;
+}
+
+.month-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 0;
+    text-align: left;
+    width: 100%;
+    transition: color 0.3s;
+}
+
+.month-btn:hover, .month-btn.active {
+    color: #ddd;
+}
+
+/* 갤러리 스타일 (Masonry Layout) */
+.gallery-container {
+    flex-grow: 1;
+    overflow-y: auto; /* 갤러리만 스크롤 */
+    padding: 40px;
+}
+
+.gallery {
+    column-count: 3; /* 3열 배치 */
+    column-gap: 20px;
+}
+
+.gallery-item {
+    margin-bottom: 20px;
+    break-inside: avoid; /* 사진이 잘리지 않도록 함 */
+}
+
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    
+    /* 기존 transition: opacity 0.3s; 대신 아래 3가지 추가 */
+    opacity: 0; /* 초기 투명도 0 (완전히 숨김) */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* 부드러운 전환 효과 */
+    transform: translateY(10px); /* 아주 살짝 아래에서 올라오는 듯한 효과 (선택사항) */
+}
+
+/* 로딩이 완료되었을 때 적용할 클래스 */
+.gallery-item img.loaded {
+    opacity: 1; /* 투명도 1로 변경 (나타남) */
+    transform: translateY(0); /* 원래 위치로 복귀 */
+}
+
+.gallery-item img:hover {
+    opacity: 0.8;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; padding: 20px; }
+    .gallery { column-count: 1; } /* 모바일은 1열 */
+    body { overflow: auto; }
+}
+
+/* --- 라이트박스(모달) 스타일 --- */
+
+.lightbox {
+    display: none; /* 평소에는 숨김 */
+    position: fixed;
+    z-index: 1000; /* 사이드바보다 위에 뜨도록 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.5); /* 불투명도 50% 검은색 배경 */
+    backdrop-filter: blur(5px); /* 배경을 살짝 흐리게 해서 집중도 높임 (선택사항) */
+    justify-content: center;
+    align-items: center;
+}
+
+.lightbox.active {
+    display: flex; /* 활성화되면 보임 */
+}
+
+/* 이미지와 화살표를 감싸는 컨테이너 */
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 확대된 이미지 */
+#lightbox-img {
+    max-width: 90vw;   /* 화면 너비의 90% 제한 */
+    max-height: 90vh;  /* 화면 높이의 90% 제한 */
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+/* 닫기 버튼 (X) */
+.close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 1001;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #bbb;
+}
+
+/* 좌우 네비게이션 버튼 */
+.nav-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    padding: 20px;
+    user-select: none;
+    transition: 0.3s;
+    
+    /* 이미지 양옆에 배치 */
+    position: absolute; 
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.nav-btn:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.prev {
+    left: -60px; /* 이미지 왼쪽 바깥 */
+}
+
+.next {
+    right: -60px; /* 이미지 오른쪽 바깥 */
+}
+
+/* 모바일 대응: 화살표를 화면 끝으로 붙임 */
+@media (max-width: 768px) {
+    .nav-btn {
+        font-size: 30px;
+        background: rgba(0,0,0,0.3); /* 모바일은 잘 안보일 수 있어 배경 추가 */
+        padding: 10px;
+    }
+    .prev { left: 0; }
+    .next { right: 0; }
+    .close { top: 10px; right: 20px; font-size: 30px; }
+}
