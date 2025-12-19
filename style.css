@@ -132,14 +132,6 @@ ul {
     opacity: 0.8;
 }
 
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-    .container { flex-direction: column; }
-    .sidebar { width: 100%; height: auto; padding: 20px; }
-    .gallery { column-count: 1; } /* 모바일은 1열 */
-    body { overflow: auto; }
-}
-
 /* --- 라이트박스(모달) 스타일 --- */
 
 .lightbox {
@@ -227,14 +219,58 @@ ul {
     right: -60px; /* 이미지 오른쪽 바깥 */
 }
 
-/* 모바일 대응: 화살표를 화면 끝으로 붙임 */
+/* --- 모바일 반응형 수정 --- */
 @media (max-width: 768px) {
+    body {
+        overflow: auto; /* 전체 페이지 스크롤 허용 */
+    }
+
+    .container {
+        display: block; /* 가로 배치를 세로 배치로 변경 */
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto; /* 고정 높이 해제 (내용만큼만 차지) */
+        padding: 40px 20px 20px 20px;
+        overflow-y: visible; /* 사이드바 내부 스크롤 제거 */
+        border-bottom: 1px solid #333; /* 메뉴와 사진 구분선 (선택사항) */
+    }
+
+    .logo {
+        margin-bottom: 30px; /* 로고 간격 축소 */
+    }
+
+    .gallery-container {
+        width: 100%;
+        height: auto; /* 고정 높이 해제 */
+        overflow-y: visible; /* 내부 스크롤 해제하여 전체 페이지 스크롤 사용 */
+        padding: 20px;
+    }
+
+    .gallery {
+        column-count: 2; /* 모바일에서도 2열 정도가 보기 좋습니다. (원하시면 1로 변경 가능) */
+        column-gap: 10px;
+    }
+    
+    .gallery-item {
+        margin-bottom: 10px;
+    }
+
+    /* 모바일에서 메뉴 버튼들이 너무 크지 않게 조정 */
+    .year-btn {
+        font-size: 20px;
+    }
+    
+    .month-btn {
+        padding: 8px 0;
+    }
+
+    /* 라이트박스(팝업) 화살표 크기 조정 */
     .nav-btn {
-        font-size: 30px;
-        background: rgba(0,0,0,0.3); /* 모바일은 잘 안보일 수 있어 배경 추가 */
+        font-size: 24px;
         padding: 10px;
     }
-    .prev { left: 0; }
-    .next { right: 0; }
-    .close { top: 10px; right: 20px; font-size: 30px; }
+    .prev { left: 5px; }
+    .next { right: 5px; }
 }
