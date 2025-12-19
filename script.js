@@ -79,45 +79,82 @@ function initMenu() {
     });
 }
 
-function filterImages(targetYear, targetMonth) {
+async function filterImages(targetYear, targetMonth) {
     const gallery = document.getElementById('gallery');
-    gallery.innerHTML = '';
+    gallery.innerHTML = ''; 
 
-    // 필터링 로직은 그대로 유지...
     currentFilteredImages = allImages.filter(img => {
-        if (targetMonth === null) {
-            return img.year == targetYear;
-        } else {
-            return img.year == targetYear && img.month == targetMonth;
-        }
+        if (targetMonth === null) return img.year == targetYear;
+        return img.year == targetYear && img.month == targetMonth;
     });
 
-    // 이미지 렌더링
-    currentFilteredImages.forEach((imgData, index) => {
+    // 효율적 로딩을 위해 이미지 리스트를 10개씩 끊어서 처리 (비동기 청크 렌더링)
+    const chunkSize = 10;
+    for (let i = 0; i < currentFilteredImages.length; i += chunkSize) {
+        const chunk = currentFilteredImages.slice(i, i + chunkSize);
+        
+        // requestAnimationFrame이나 setTimeout을 써서 브라우저에게 숨 쉴 틈을 줌
+        await new Promise(resolve => {
+            requestAnimationFrame(() => {
+                renderChunk(chunk, i);
+                resolve();
+            });
+        });
+    }
+}
+
+function renderChunk(chunk, startIndex) {
+    const gallery = document.getElementById('gallery');
+
+    chunk.forEach((imgData, index) => {
+        const actualIndex = startIndex + index;
         const div = document.createElement('div');
         div.className = 'gallery-item';
         
         const img = document.createElement('img');
-        img.src = imgData.path;
-        img.loading = 'lazy';
         
-        // --- 로딩 이벤트 추가 (새로운 부분) ---
-        img.onload = () => {
-            // 이미지가 완전히 로드되면 'loaded' 클래스를 추가합니다.
-            // CSS의 transition 덕분에 opacity가 0에서 1로 0.5초간 부드럽게 변합니다.
-            img.classList.add('loaded');
-        };
-        // ----------------------------------------
+        // 1. 실제 경로는 data-src에 숨겨둠 (비동기 로딩용)
+        img.dataset.src = imgData.path; 
+        img.alt = `Photo ${imgData.year}-${imgData.month}`;
+        img.loading = 'lazy'; // 브라우저 네이티브 지연 로딩 활용
 
-        // 클릭 시 라이트박스 열기
-        img.addEventListener('click', () => {
-            openLightbox(index);
-        });
-        
+        // 클릭 이벤트
+        img.addEventListener('click', () => openLightbox(actualIndex));
+
         div.appendChild(img);
         gallery.appendChild(div);
+
+        // 2. Intersection Observer를 사용하여 화면에 보일 때 src 주입
+        observer.observe(img);
     });
 }
+
+// Intersection Observer 설정
+const observerOptions = {
+    root: null, // viewport 기준
+    rootMargin: '200px', // 화면에 보이기 200px 전에 미리 로드 시작
+    threshold: 0.01
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            // data-src에 있던 값을 실제 src로 옮기면서 로딩 시작
+            if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+            
+            img.onload = () => {
+                img.classList.add('loaded'); // 이미지 페이드인
+                img.parentElement.classList.add('loaded'); // 스켈레톤 애니메이션 정지
+            };
+            
+            observer.unobserve(img); // 한 번 로드된 이미지는 관찰 중단
+        }
+    });
+}, observerOptions);
 
 // --- 라이트박스 관련 함수들 ---
 

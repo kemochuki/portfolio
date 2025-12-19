@@ -274,3 +274,45 @@ ul {
     .prev { left: 5px; }
     .next { right: 5px; }
 }
+
+/* 이미지 아이템 컨테이너 */
+.gallery-item {
+    margin-bottom: 20px;
+    break-inside: avoid;
+    background-color: #222; /* 이미지가 없을 때 보일 배경색 */
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    min-height: 200px; /* 로딩 전 최소 높이 부여 */
+}
+
+/* 로딩 애니메이션 (Shimmer 효과) */
+.gallery-item::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    100% { left: 100%; }
+}
+
+/* 이미지가 로드되면 애니메이션 제거 */
+.gallery-item.loaded::before {
+    display: none;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+
+.gallery-item img.loaded {
+    opacity: 1;
+}
